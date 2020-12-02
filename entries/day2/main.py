@@ -4,7 +4,7 @@ from typing import List
 
 
 def get_input_data(file: str) -> List[str]:
-    with pathlib.Path(file).absolute().open() as f:
+    with pathlib.Path(file).open() as f:
         content = f.readlines()
 
     return content

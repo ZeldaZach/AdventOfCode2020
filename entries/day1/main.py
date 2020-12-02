@@ -3,7 +3,7 @@ from typing import List, Optional
 
 
 def get_input_data(file: str) -> List[int]:
-    with pathlib.Path(file).absolute().open() as f:
+    with pathlib.Path(file).open() as f:
         content = f.readlines()
 
     return list(map(int, content))
