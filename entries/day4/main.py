@@ -51,7 +51,10 @@ def day4_part1(
 
     # Last validation after the loop concludes
     if not required_fields_not_found:
-        valid_passports += 1
+        if validate_function:
+            valid_passports += validate_function(passport_data)
+        else:
+            valid_passports += 1
 
     return valid_passports
 
@@ -100,7 +103,6 @@ def day4_part2_validator(passport_data: Dict[str, str]) -> bool:
         elif key == "cid":
             continue
         else:
-            print(f"{key}, {value} -- {passport_data}")
             return False
 
     return True
