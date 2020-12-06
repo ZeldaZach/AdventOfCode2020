@@ -12,8 +12,8 @@ def get_input_data(file: str) -> str:
 def day6_part1(data: str) -> int:
     total = 0
 
-    for group in data.split("\n\n"):
-        total += len({char for char in group if char != "\n"})
+    for travel_group in data.split("\n\n"):
+        total += len({yes_char for yes_char in travel_group if yes_char != "\n"})
 
     return total
 
@@ -21,11 +21,11 @@ def day6_part1(data: str) -> int:
 def day6_part2(data: str) -> int:
     total = 0
 
-    for group in data.split("\n\n"):
+    for travel_group in data.split("\n\n"):
         alphabet = {char for char in string.ascii_lowercase}
 
-        for entries in group.split():
-            alphabet = alphabet.intersection({char for char in entries})
+        for person in travel_group.split():
+            alphabet = alphabet.intersection({yes_char for yes_char in person})
 
         total += len(alphabet)
 
