@@ -3,94 +3,51 @@ import re
 from typing import List, Tuple, Dict
 
 
-class Graph:
-    class Node:
-        bag_color: str
-        bag_count: int
+def graph_dfs(
+    root: str, graph: Dict[str, List[Tuple[str, int]]]
+) -> Tuple[List[str], int]:
+    nodes_visited = []
+    total_weight = 0
 
-        def __init__(self, bag_count: str, bag_color: str) -> None:
-            self.bag_count = int(bag_count)
-            self.bag_color = bag_color
+    for neighbor, weight in graph[root]:
+        nodes_visited.append(neighbor)
 
-        def __repr__(self) -> str:
-            return f"{self.bag_count} {self.bag_color} bags"
+        neighbor_visited, neighbor_total_weight = graph_dfs(neighbor, graph)
 
-    graph: Dict[str, List[Node]]
-    edges: List[Tuple[str, str]]
-    spanning_tree_memo: Dict[str, List[str]]
-    spanning_tree_weight_memo: Dict[str, int]
+        nodes_visited.extend(neighbor_visited)
+        total_weight += weight * (1 + neighbor_total_weight)
 
-    def __init__(
-        self, graph: Dict[str, List[Node]], edges: List[Tuple[str, str]]
-    ) -> None:
-        self.graph = graph
-        self.edges = edges
-        self.spanning_tree_memo = dict()
-        self.spanning_tree_weight_memo = dict()
-
-    def get_spanning_tree_nodes(self, root: str) -> Tuple[List[str], int]:
-        weight = 0
-        nodes_visited = list()
-
-        for here, there in self.edges:
-            if root == here:
-                nodes_visited.append(there)
-
-                multiplier = 0
-                for node in self.graph[here]:
-                    if node.bag_color == there:
-                        multiplier = node.bag_count
-
-                if there in self.spanning_tree_memo:
-                    nodes_visited.extend(self.spanning_tree_memo[there])
-                    weight += multiplier * (1 + self.spanning_tree_weight_memo[there])
-                    continue
-
-                (
-                    self.spanning_tree_memo[there],
-                    self.spanning_tree_weight_memo[there],
-                ) = self.get_spanning_tree_nodes(there)
-
-                nodes_visited.extend(self.spanning_tree_memo[there])
-                weight += multiplier * (1 + self.spanning_tree_weight_memo[there])
-
-        return list(set(nodes_visited)), weight
+    return nodes_visited, total_weight
 
 
-def day7_generator(data: List[str]) -> Tuple[int, int]:
+def build_weighted_graph(data: List[str]) -> Dict[str, List[Tuple[str, int]]]:
     root_regex = re.compile(r"([\w ]+) bags contain")
     children_regex = re.compile(r"(?:(?:(\d+) ([\w ]+)) bags?)+")
 
-    graph: Dict[str, List[Graph.Node]] = dict()
+    graph: Dict[str, List[Tuple[str, int]]] = dict()
     for rule in data:
         root = root_regex.findall(rule)[0]
-        children_nodes = [Graph.Node(x, y) for x, y in children_regex.findall(rule)]
-        graph[root] = children_nodes
+        children_nodes = children_regex.findall(rule)
 
-    graph_edges = []
-    for node in graph.keys():
-        for neighbour in graph[node]:
-            graph_edges.append((node, neighbour.bag_color))
+        graph[root] = [(color, int(weight)) for weight, color in children_nodes]
 
-    packing_bag_graph = Graph(graph, graph_edges)
-
-    total_nodes = 0
-    gold_weight = 0
-    for node in graph.keys():
-        results, weight = packing_bag_graph.get_spanning_tree_nodes(node)
-        total_nodes += "shiny gold" in results
-        if node == "shiny gold":
-            gold_weight = weight
-
-    return total_nodes, gold_weight
+    return graph
 
 
 def day7_part1(data: List[str]) -> int:
-    return day7_generator(data)[0]
+    graph = build_weighted_graph(data)
+
+    shiny_gold_viable = 0
+    for node in graph.keys():
+        nodes_visited, _ = graph_dfs(node, graph)
+        shiny_gold_viable += "shiny gold" in nodes_visited
+
+    return shiny_gold_viable
 
 
 def day7_part2(data: List[str]) -> int:
-    return day7_generator(data)[1]
+    graph = build_weighted_graph(data)
+    return graph_dfs("shiny gold", graph)[1]
 
 
 def get_input_data(file: str) -> List[str]:
