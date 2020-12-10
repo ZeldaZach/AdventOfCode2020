@@ -4,17 +4,18 @@ from typing import List
 
 
 def day10_part1(data: List[int]) -> int:
-    diff_amounts = defaultdict(int)
+    data.sort()
 
-    prior_value = 0
-    for value in sorted(data):
-        for additional in range(1, 4):
-            if prior_value + additional == value:
-                diff_amounts[additional] += 1
+    # The last entry is always +3
+    diff_amounts = {1: 0, 2: 0, 3: 1}
 
-        prior_value = value
+    # The first entry has no resistance downgrade
+    diff_amounts[data[0]] += 1
 
-    return diff_amounts[1] * (diff_amounts[3] + 1)
+    for index in range(len(data) - 1):
+        diff_amounts[data[index + 1] - data[index]] += 1
+
+    return diff_amounts[1] * diff_amounts[3]
 
 
 def day10_part2(data: List[int]) -> int:
