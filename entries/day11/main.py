@@ -1,31 +1,25 @@
 import itertools
-import operator
 import pathlib
-from typing import List, Optional, Callable, Any
+from typing import List, Callable
 
 
 def next_seat_on_path_occupied(
     data: List[List[str]],
     row: int,
     col: int,
-    row_op: Optional[Any],
-    col_op: Optional[Any],
+    row_modifier: int,
+    col_modifier: int,
 ) -> bool:
-    i, j = 0, 0
+    new_row, new_col = row, col
     while True:
-        i, j = i + 1, j + 1
-
-        new_row = row_op(row, i) if row_op else row
-        new_col = col_op(col, j) if col_op else col
+        new_row += row_modifier
+        new_col += col_modifier
 
         if not (0 <= new_row < len(data) and 0 <= new_col < len(data[0])):
             return False
 
-        if data[new_row][new_col] == "#":
-            return True
-
-        if data[new_row][new_col] == "L":
-            return False
+        if data[new_row][new_col] != ".":
+            return data[new_row][new_col] == "#"
 
 
 def seats_found_ignoring_floor(data: List[List[str]], row: int, col: int) -> int:
@@ -35,14 +29,12 @@ def seats_found_ignoring_floor(data: List[List[str]], row: int, col: int) -> int
     """
     total_seats_occupied = 0
 
-    cardinal_direction_operations = itertools.product(
-        [operator.add, operator.sub, None], repeat=2
-    )
+    cardinal_direction_operations = itertools.product([-1, 0, 1], repeat=2)
 
-    for row_op, col_op in cardinal_direction_operations:
-        if row_op or col_op:
+    for row_modifier, col_modifier in cardinal_direction_operations:
+        if row_modifier or col_modifier:
             total_seats_occupied += next_seat_on_path_occupied(
-                data, row, col, row_op, col_op
+                data, row, col, row_modifier, col_modifier
             )
 
     return total_seats_occupied
