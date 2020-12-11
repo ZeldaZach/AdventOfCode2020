@@ -1,3 +1,4 @@
+import copy
 import itertools
 import pathlib
 from typing import List, Callable
@@ -66,26 +67,21 @@ def apply_rules(
     seat_occupation_tolerance: int,
     seat_search_func: Callable[[List[List[str]], int, int], int],
 ) -> List[List[str]]:
-    next_iteration = []
+    next_iteration = copy.deepcopy(this_iteration)
 
     for row in range(len(this_iteration)):
-        next_iteration_row = []
         for col in range(len(this_iteration[row])):
             if (
                 this_iteration[row][col] == "L"
                 and seat_search_func(this_iteration, row, col) == 0
             ):
-                next_iteration_row.append("#")
+                next_iteration[row][col] = "#"
             elif (
                 this_iteration[row][col] == "#"
                 and seat_search_func(this_iteration, row, col)
                 >= seat_occupation_tolerance
             ):
-                next_iteration_row.append("L")
-            else:
-                next_iteration_row.append(this_iteration[row][col])
-
-        next_iteration.append(next_iteration_row)
+                next_iteration[row][col] = "L"
 
     return next_iteration
 
