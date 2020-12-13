@@ -3,55 +3,43 @@ import pathlib
 from typing import List
 
 
-def day13_part1(data):
+def day13_part1(data: List[str]) -> int:
     earliest_departure = int(data[0])
     bus_ids = [int(num) for num in data[1].split(",") if num != "x"]
     bus_intervals = copy.deepcopy(bus_ids)
 
+    # Push each bus to their first departure at or after earliest_departure
     for index in range(len(bus_intervals)):
         while bus_intervals[index] < earliest_departure:
             bus_intervals[index] += bus_ids[index]
 
-    print(f"Depart Time = {earliest_departure}")
-    print(f"Closest = {min(bus_intervals)}")
+    soonest_bus = min(bus_intervals)
+    soonest_bus_index = bus_intervals.index(soonest_bus)
 
-    return (min(bus_intervals) - earliest_departure) * bus_ids[
-        bus_intervals.index(min(bus_intervals))
-    ]
+    return (soonest_bus - earliest_departure) * bus_ids[soonest_bus_index]
 
 
-def day13_part2(data):
+def day13_part2(data: List[str]) -> int:
     bus_ids = [int(num) if num != "x" else -1 for num in data[1].split(",")]
 
     time = bus_ids[0]
-
     incrementer = bus_ids[0]
-    aligned = set()
-    i = 0
-    while True:
-        success = True
-        print(i, time, incrementer)
-        i += 1
+
+    while any(x != -1 for x in bus_ids[1:]):
         for index in range(1, len(bus_ids)):
             if bus_ids[index] == -1:
                 continue
 
+            # We found a new multiple of all the prior found busses
+            # plus this, so we can multiply by this and increment even faster
             if (time + index) % bus_ids[index] == 0:
-                print(f"MEETUP 0 and {index}")
+                incrementer *= bus_ids[index]
+                bus_ids[index] = -1
 
-                if index not in aligned:
-                    aligned.add(index)
-                    incrementer = incrementer * bus_ids[index]
+        time += incrementer
 
-            if (time + index) % bus_ids[index]:
-                success = False
-
-        if not success:
-            time += incrementer
-        else:
-            break
-
-    return time
+    # We over incremented earlier, so account for that
+    return time - incrementer
 
 
 def get_input_data(file: str) -> List[str]:
@@ -62,5 +50,5 @@ def get_input_data(file: str) -> List[str]:
 
 
 if __name__ == "__main__":
-    print(day13_part1(get_input_data("input.txt")), 2845)
-    print(day13_part2(get_input_data("input.txt")), 487905974205117)
+    print(day13_part1(get_input_data("input.txt")))
+    print(day13_part2(get_input_data("input.txt")))
