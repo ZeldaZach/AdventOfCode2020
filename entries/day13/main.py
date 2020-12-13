@@ -13,10 +13,10 @@ def day13_part1(data: List[str]) -> int:
         while bus_intervals[index] < earliest_departure:
             bus_intervals[index] += bus_ids[index]
 
-    soonest_bus = min(bus_intervals)
-    soonest_bus_index = bus_intervals.index(soonest_bus)
+    soonest_departure = min(bus_intervals)
+    soonest_bus_index = bus_intervals.index(soonest_departure)
 
-    return (soonest_bus - earliest_departure) * bus_ids[soonest_bus_index]
+    return (soonest_departure - earliest_departure) * bus_ids[soonest_bus_index]
 
 
 def day13_part2(data: List[str]) -> int:
@@ -25,7 +25,7 @@ def day13_part2(data: List[str]) -> int:
     time = bus_ids[0]
     incrementer = bus_ids[0]
 
-    while any(x != -1 for x in bus_ids[1:]):
+    while True:
         for index in range(1, len(bus_ids)):
             if bus_ids[index] == -1:
                 continue
@@ -36,10 +36,13 @@ def day13_part2(data: List[str]) -> int:
                 incrementer *= bus_ids[index]
                 bus_ids[index] = -1
 
+        # We've accounted for all busses, we're done!
+        if all(bus_id == -1 for bus_id in bus_ids[1:]):
+            break
+
         time += incrementer
 
-    # We over incremented earlier, so account for that
-    return time - incrementer
+    return time
 
 
 def get_input_data(file: str) -> List[str]:
